@@ -69,7 +69,7 @@ jobs:
       with:
         python-version: ${{ inputs.python_version }}
         cache: "pip"
-        cache-dependency-path: $REQUIREMENTS_PATH
+        cache-dependency-path: ${{ env.REQUIREMENTS_PATH }}
 
     - name: Install pre-commit
       id: install-pre-commit
