@@ -23,8 +23,8 @@ jobs:
     steps:
     - name: Echo contexts
       run: |
-        echo ${{ toJSON(github) }}
-        echo ${{ toJSON(inputs) }}
-        echo ${{ toJSON(env) }}
-        echo ${{ toJSON(runner) }}
-        echo ${{ toJSON(secrets) }}
+        echo '${{ toJSON(github) }}'
+        echo '${{ toJSON(inputs) }}'
+        echo '${{ toJSON(env) }}'
+        echo '${{ toJSON(runner) }}'
+        echo '${{ toJSON(secrets) }}'
