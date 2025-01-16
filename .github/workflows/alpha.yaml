@@ -13,7 +13,7 @@ defaults:
 jobs:
   job-one:
     name: Job One
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: $RUNS_ON
     steps:
     - name: List files
       run: ls .
@@ -21,18 +21,18 @@ jobs:
       run: ls -lah .
   job-two:
     name: Job Two
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: $RUNS_ON
     steps:
     - name: Print working directory
       run: pwd
   job-three:
     name: Job Three
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: $RUNS_ON
     steps:
     - name: Echo contexts
       run: |
-        echo ${{ github }}
-        echo ${{ inputs }}
-        echo ${{ env }}
-        echo ${{ runner }}
-        echo ${{ secrets }}
+        echo ${{ toJSON(github) }}
+        echo ${{ toJSON(inputs) }}
+        echo ${{ toJSON(env) }}
+        echo ${{ toJSON(runner) }}
+        echo ${{ toJSON(secrets) }}
