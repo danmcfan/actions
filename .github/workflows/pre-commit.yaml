@@ -78,7 +78,7 @@ jobs:
       with:
         key: pre-commit-${{ inputs.python_version }}-${{ steps.install-pre-commit.outputs.PRE_COMMIT_VERSION }}-${{ hashFiles(inputs.pre_commit_config_path) }}
         path: ~/.cache/pre-commit
-        
+
     - name: Run pre-commit text formatters if any files changed exit error
       run: |
         if [ ${{ inputs.pre_commit_hooks }} = "all" ]; then
