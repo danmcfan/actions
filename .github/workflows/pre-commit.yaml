@@ -81,8 +81,7 @@ jobs:
         python -c '
         import subprocess, sys
         version = subprocess.run(["pre-commit", "--version"], capture_output=True, text=True).stdout.split(" ")[1]
-        print("VERSION=" + version)
-        subprocess.run(["echo", "VERSION=" + version], check=True)
+        subprocess.run(["echo", "VERSION=" + version, ">>", "$GITHUB_OUTPUT"], check=True)
         '
 
     - name: Cache pre-commit
