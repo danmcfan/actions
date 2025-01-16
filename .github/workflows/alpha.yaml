@@ -2,18 +2,10 @@ name: Alpha
 
 on: push
 
-env:
-  RUNS_ON: ubuntu-24.04
-
-defaults:
-  run:
-    shell: bash
-    working-directory: .
-
 jobs:
   job-one:
     name: Job One
-    runs-on: $RUNS_ON
+    runs-on: ubuntu-latest
     steps:
     - name: List files
       run: ls .
@@ -21,13 +13,13 @@ jobs:
       run: ls -lah .
   job-two:
     name: Job Two
-    runs-on: $RUNS_ON
+    runs-on: ubuntu-latest
     steps:
     - name: Print working directory
       run: pwd
   job-three:
     name: Job Three
-    runs-on: $RUNS_ON
+    runs-on: ubuntu-latest
     steps:
     - name: Echo contexts
       run: |
