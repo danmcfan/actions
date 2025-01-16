@@ -52,6 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
     - name: Create requirements.txt
       run: |
         if [ ${{ inputs.pre_commit_version }} == "latest" ]; then
@@ -59,21 +60,25 @@ jobs:
         else
           echo "pre-commit==${{ inputs.pre_commit_version }}" > pre-commit-requirements.txt
         fi
+
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python_version }}
         cache: "pip"
         cache-dependency-path: pre-commit-requirements.txt
+
     - name: Install pre-commit
       id: install-pre-commit
       run: |
         pip install -r pre-commit-requirements.txt
         echo "PRE_COMMIT_VERSION=$(pre-commit --version | sed 's/pre-commit //')" >> $GITHUB_OUTPUT
+
     - name: Cache pre-commit
       uses: actions/cache@v4
       with:
         key: pre-commit-${{ inputs.python_version }}-${{ steps.install-pre-commit.outputs.PRE_COMMIT_VERSION }}-${{ hashFiles(inputs.pre_commit_config_path) }}
         path: ~/.cache/pre-commit
+        
     - name: Run pre-commit text formatters if any files changed exit error
       run: |
         if [ ${{ inputs.pre_commit_hooks }} = "all" ]; then
