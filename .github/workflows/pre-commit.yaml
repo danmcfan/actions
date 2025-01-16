@@ -47,6 +47,10 @@ on:
         required: false
         description: "Path to the pre-commit config file"
 
+env:
+  REQUIREMENTS_PATH: pre-commit-requirements.txt
+  CACHE_PATH: ~/.cache/pre-commit
+
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -56,36 +60,54 @@ jobs:
     - name: Create requirements.txt
       run: |
         if [ ${{ inputs.pre_commit_version }} == "latest" ]; then
-          echo "pre-commit" > pre-commit-requirements.txt
+          echo "pre-commit" > $REQUIREMENTS_PATH
         else
-          echo "pre-commit==${{ inputs.pre_commit_version }}" > pre-commit-requirements.txt
+          echo "pre-commit==${{ inputs.pre_commit_version }}" > $REQUIREMENTS_PATH
         fi
 
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python_version }}
         cache: "pip"
-        cache-dependency-path: pre-commit-requirements.txt
+        cache-dependency-path: $REQUIREMENTS_PATH
 
     - name: Install pre-commit
       id: install-pre-commit
       run: |
-        pip install -r pre-commit-requirements.txt
-        echo "PRE_COMMIT_VERSION=$(pre-commit --version | sed 's/pre-commit //')" >> $GITHUB_OUTPUT
+        # Install requirements file
+        pip install -r $REQUIREMENTS_PATH
+
+        # Output pre-commit version ("pre-commit 1.2.3" -> "1.2.3")
+        python -c '
+        import subprocess, sys
+        version = subprocess.run(["pre-commit", "--version"], capture_output=True, text=True).stdout.split(" ")[1]
+        print("VERSION=" + version)
+        subprocess.run(["echo", "VERSION=" + version], check=True)
+        '
 
     - name: Cache pre-commit
       uses: actions/cache@v4
       with:
-        key: pre-commit-${{ inputs.python_version }}-${{ steps.install-pre-commit.outputs.PRE_COMMIT_VERSION }}-${{ hashFiles(inputs.pre_commit_config_path) }}
+        key: pre-commit-${{ inputs.python_version }}-${{ steps.install-pre-commit.outputs.VERSION }}-${{ hashFiles(inputs.pre_commit_config_path) }}
         path: ~/.cache/pre-commit
 
     - name: Run pre-commit text formatters if any files changed exit error
       run: |
-        if [ ${{ inputs.pre_commit_hooks }} = "all" ]; then
-          pre-commit run --show-diff-on-failure --all-files --config ${{ inputs.pre_commit_config_path }}
-        else
-          IFS="," read -ra HOOKS <<< ${{ inputs.pre_commit_hooks }}
-          for hook in "${HOOKS[@]}"; do
-            pre-commit run --show-diff-on-failure --all-files --config ${{ inputs.pre_commit_config_path }} -- "$hook"
-          done
-        fi
+        python -c '
+        import subprocess, sys
+
+        hooks = "${{ inputs.pre_commit_hooks }}"
+        config = "${{ inputs.pre_commit_config_path }}"
+        base_cmd = ["pre-commit", "run", "--show-diff-on-failure", "--all-files", "--config", config]
+
+        if hooks == "all":
+            print("Running all hooks")
+            sys.exit(subprocess.run(base_cmd).returncode)
+
+        for hook in hooks.split(","):
+            cmd = base_cmd + ["--hook-stage", hook.strip()]
+            print("Running hook: " + hook.strip())
+            result = subprocess.run(cmd)
+            if result.returncode != 0:
+                sys.exit(result.returncode)
+        '
