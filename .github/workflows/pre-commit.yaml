@@ -78,6 +78,7 @@ jobs:
         pip install -r $REQUIREMENTS_PATH
 
         # Output pre-commit version ("pre-commit 1.2.3" -> "1.2.3")
+        pre-commit --version
         echo "VERSION=$(pre-commit --version | sed 's/pre-commit //')" >> $GITHUB_OUTPUT
 
     - name: Cache pre-commit
