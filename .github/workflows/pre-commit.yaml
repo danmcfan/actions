@@ -78,11 +78,7 @@ jobs:
         pip install -r $REQUIREMENTS_PATH
 
         # Output pre-commit version ("pre-commit 1.2.3" -> "1.2.3")
-        python -c '
-        import subprocess, sys
-        version = subprocess.run(["pre-commit", "--version"], capture_output=True, text=True).stdout.split(" ")[1]
-        subprocess.run(["echo", "VERSION=" + version, ">>", "$GITHUB_OUTPUT"], check=True)
-        '
+        echo "VERSION=$(pre-commit --version | sed 's/pre-commit //')" >> $GITHUB_OUTPUT
 
     - name: Cache pre-commit
       uses: actions/cache@v4
