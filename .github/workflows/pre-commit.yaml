@@ -67,7 +67,7 @@ jobs:
     - name: Install pre-commit
       id: install-pre-commit
       run: |
-        pip install -r requirements-pre-commit.txt
+        pip install -r pre-commit-requirements.txt
         echo "PRE_COMMIT_VERSION=$(pre-commit --version | sed 's/pre-commit //')" >> $GITHUB_OUTPUT
     - name: Cache pre-commit
       uses: actions/cache@v4
