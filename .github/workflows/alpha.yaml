@@ -1,0 +1,35 @@
+name: Alpha
+
+on: push
+
+defaults:
+  run:
+    shell: bash
+    working-directory: .
+
+jobs:
+  job-one:
+    name: Job One
+    runs-on: ubuntu-latest
+    steps:
+    - name: List files
+      run: ls .
+    - name: List files
+      run: ls -lah .
+  job-two:
+    name: Job Two
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print working directory
+      run: pwd
+  job-three:
+    name: Job Three
+    runs-on: ubuntu-latest
+    steps:
+    - name: Echo contexts
+      run: |
+        echo ${{ github }}
+        echo ${{ inputs }}
+        echo ${{ env }}
+        echo ${{ runner }}
+        echo ${{ secrets }}
