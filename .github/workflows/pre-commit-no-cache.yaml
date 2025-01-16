@@ -1,0 +1,83 @@
+name: Pre-commit with No Cache
+
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        type: string
+        default: "3.12"
+        required: false
+        description: "Python version to use"
+      pre_commit_version:
+        type: string
+        default: "latest"
+        required: false
+        description: "Pre-commit version to use"
+      pre_commit_hooks:
+        type: string
+        default: "all"
+        required: false
+        description: "Hooks to run, seperated by commas"
+      pre_commit_config_path:
+        type: string
+        default: ".pre-commit-config.yaml"
+        required: false
+        description: "Path to the pre-commit config file"
+
+  workflow_dispatch:
+    inputs:
+      python_version:
+        type: string
+        default: "3.12"
+        required: false
+        description: "Python version to use"
+      pre_commit_version:
+        type: string
+        default: "latest"
+        required: false
+        description: "Pre-commit version to use"
+      pre_commit_hooks:
+        type: string
+        default: "all"
+        required: false
+        description: "Hooks to run, seperated by commas"
+      pre_commit_config_path:
+        type: string
+        default: ".pre-commit-config.yaml"
+        required: false
+        description: "Path to the pre-commit config file"
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Create requirements.txt
+      run: |
+        if [ ${{ inputs.pre_commit_version }} == "latest" ]; then
+          echo "pre-commit" > pre-commit-requirements.txt
+        else
+          echo "pre-commit==${{ inputs.pre_commit_version }}" > pre-commit-requirements.txt
+        fi
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python_version }}
+
+    - name: Install pre-commit
+      id: install-pre-commit
+      run: |
+        pip install -r pre-commit-requirements.txt
+        echo "PRE_COMMIT_VERSION=$(pre-commit --version | sed 's/pre-commit //')" >> $GITHUB_OUTPUT
+
+    - name: Run pre-commit text formatters if any files changed exit error
+      run: |
+        if [ ${{ inputs.pre_commit_hooks }} = "all" ]; then
+          pre-commit run --show-diff-on-failure --all-files --config ${{ inputs.pre_commit_config_path }}
+        else
+          IFS="," read -ra HOOKS <<< ${{ inputs.pre_commit_hooks }}
+          for hook in "${HOOKS[@]}"; do
+            pre-commit run --show-diff-on-failure --all-files --config ${{ inputs.pre_commit_config_path }} -- "$hook"
+          done
+        fi
